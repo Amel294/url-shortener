@@ -26,6 +26,24 @@ router.post('/shortenUrl', async (req, res) => {
         return res.status(500).json({ message: 'Server Error', error });
     }
 });
+router.get('/locations/:shorturl', async (req, res) => {
+    try {
+        const { shorturl } = req.params;
+        console.log("Fetching locations for:", shorturl);
+        
+        // Find the document for the given short URL, retrieving only the locations field
+        const urlData = await urlModel.findOne({ shortUrl: shorturl }, { locations: 1, _id: 0 });
+        
+        if (!urlData) {
+            return res.status(404).json({ message: 'URL not found' });
+        }
+        
+        res.status(200).json({ locations: urlData.locations });
+    } catch (error) {
+        console.error("Error fetching locations:", error);
+        res.status(500).json({ message: 'Server Error', error });
+    }
+});
 
 // Redirect Short URL
 router.get('/:shortUrl', async (req, res) => {
