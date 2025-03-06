@@ -1,7 +1,7 @@
 import express from 'express';
 import urlModel from '../models/urlModel.js';
 import { nanoid } from 'nanoid';
-
+import axios from 'axios'
 const router = express.Router();
 
 // Shorten URL
@@ -38,14 +38,36 @@ router.get('/:shortUrl', async (req, res) => {
         }
 
         urlData.clicks += 1;
-        await urlData.save();
 
+        // Get user's IP address from request headers
+        const userIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+        console.log(userIp)
+        if (userIp) {
+            try {
+                // Get location data from IP
+                const { data } = await axios.get(`http://ip-api.com/json/${userIp}`);
+                
+                if (data.status === "success") {
+                    const location = {
+                        type: "Point",
+                        coordinates: [data.lon, data.lat], // Longitude, Latitude
+                        country: data.country,
+                        city: data.city
+                    };
+
+                    urlData.locations.push(location);
+                }
+            } catch (geoError) {
+                console.error("Error fetching geolocation:", geoError.message);
+            }
+        }
+
+        await urlData.save();
         res.redirect(urlData.originalUrl);
     } catch (error) {
         return res.status(500).json({ message: 'Server Error', error });
     }
 });
-
 router.get('/clicks/:shortUrl', async (req, res) => {
     try {
         const { shortUrl } = req.params;
