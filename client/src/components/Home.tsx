@@ -2,7 +2,7 @@ import { useState } from "react";
 import api from "@/utils/api"; // Import Axios instance
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ClipboardCopy, Link2, Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import axios from "axios";
@@ -13,6 +13,21 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
+  const [clicks, setClicks] = useState<number | null>(null);
+
+  const handleShowClicks = async () => {
+    if (!shortenedUrl) return;
+
+    const shortCode = shortenedUrl.split("/").pop(); 
+    try {
+      const { data } = await api.get(`/clicks/${shortCode}`);
+      console.log(data.clicks)
+      setClicks(data.clicks);
+    } catch (error) {
+      console.error("Error fetching click count:", error);
+      setError("Failed to fetch click count");
+    }
+  };
 
   const handleShorten = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -103,6 +118,13 @@ export default function Home() {
             </div>
           )}
         </CardContent>
+
+        {shortenedUrl && (
+          <CardFooter className="flex gap-10">
+            <Button onClick={handleShowClicks}>Show Number of Clicks</Button>
+            {clicks && <Input value={clicks} readOnly className="flex-1 bg-muted/50 text-white" />}
+          </CardFooter>
+        )}
       </Card>
     </div>
   );

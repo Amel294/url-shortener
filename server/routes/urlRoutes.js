@@ -46,4 +46,19 @@ router.get('/:shortUrl', async (req, res) => {
     }
 });
 
+router.get('/clicks/:shortUrl', async (req, res) => {
+    try {
+        const { shortUrl } = req.params;
+        const urlData = await urlModel.findOne({ shortUrl });
+
+        if (!urlData) {
+            return res.status(404).json({ message: 'URL not found' });
+        }
+
+        res.status(200).json({ clicks: urlData.clicks });
+    } catch (error) {
+        return res.status(500).json({ message: 'Server Error', error });
+    }
+});
+
 export default router;
