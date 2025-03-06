@@ -32,7 +32,7 @@ export default function Home() {
 
     try {
       const { data } = await api.post("/shortenUrl", { originalUrl: formattedUrl });
-      setShortenedUrl(`http://localhost:3000/api/url/${data.shortUrl}`);
+      setShortenedUrl(`http://localhost:3000/api/${data.shortUrl}`);
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         setError(err.response.data.message || "Something went wrong");

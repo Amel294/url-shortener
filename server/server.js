@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Routes
-app.use('/api/url', urlRoutes);
+app.use('/api', urlRoutes);
 
 // Start Server
 app.listen(PORT, () => {
